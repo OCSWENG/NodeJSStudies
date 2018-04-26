@@ -14,7 +14,7 @@ hbs.registerPartials(__dirname + '/views/partials');
 // Handle Bar Engine
 app.set('view engine','hbs');
 
-var port = 3000;
+var port = process.env.PORT || 3000;
 
 // PART 2
 // middleware
@@ -79,6 +79,11 @@ app.get(aboutRoute, (req,res)=> {
 });
 
 
+app.get('/projects', (req,res) =>{
+    res.render('projects.hbs', {
+        pageTitle: 'Projects'
+    });
+});
 
 var badUrl = '/bad';
 var jsonData = {
