@@ -1,5 +1,9 @@
 NotesApp/node_modules/
 WebServer/node_modules/
+Tests/node_modules/
 designPatterns/
 source_code/
-
+NodeToDoApi/playground/
+NodeToDoApi/package.json
+NodeToDoApi/package-lock.json
+NodeToDoApi/node_modules
