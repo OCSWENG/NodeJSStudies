@@ -14,9 +14,9 @@ beforeEach((done) => {
 });
 
 describe('POST /todos', () => {
+    
    it('should create a new todo', (done) => {
-      setTimeout(done,0);
-      var text = 'TEST POST ToDo TeXt';
+      var text = 'TeSt POST ToDo TeXt';
        
        request(app)
        .post('/todos')
@@ -34,6 +34,7 @@ describe('POST /todos', () => {
                expect(todos.length).toBe(1);
                expect(todos[0].text).toBe(text);
                console.log(JSON.stringify(todos, undefined,2));
+               done();
            }).catch((e) => done(e));
        });
    }); 
