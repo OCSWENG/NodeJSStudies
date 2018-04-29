@@ -38,15 +38,17 @@ app.get(url, (req,res) => {
 
 
 // GET /todos/123456
-var urlParam = url +':id';
+var urlParam = url +'/:id';
 app.get(urlParam, (req,res) => {
    var id = req.params.id;
     if(!ObjectID.isValid(id)){
+        
         return res.status(404).send("Objectid is not valid");
     }
     
     Todo.findById(id).then((todo) => {
-        if( !todo){
+        console.log("Find by id returned : " + todo);
+        if(!todo){
             return res.status(404).send("Todo Find by Id Not Found");
     }
 

@@ -1,6 +1,6 @@
 const request = require('supertest');
 const expect = require('expect');
-
+const {ObjectID}  = require('mongoose');
 const {app} = require('../server');
 var {todoSchema, userSchema} = require('../../schema');
 var {mongoose,db} = require('../mongoose');
@@ -8,9 +8,11 @@ var {mongoose,db} = require('../mongoose');
 var Todo = mongoose.model('Todo', todoSchema);
 
 const dummyTodos = [{
+    _id: mongoose.Types.ObjectId(),
     text: "First Test TODo"        
     }, {
-    text: "2nd Test TODo"        
+        _id: mongoose.Types.ObjectId(),
+        text: "2nd Test TODo"        
 }];
 
 beforeEach((done) => {
@@ -71,7 +73,33 @@ describe('GET /todos', () => {
         .expect(200)
         .expect((res) => {
             expect(res.body.todos.length).toBe(2);
-        });     
-        done();
+        }).end(done);
+    });
+});
+
+describe('GET /todos/ID', () => {
+    it('should get a Todo using a valid ID', (done) =>{
+        request(app)
+        .get(`/todos/${dummyTodos[0]._id.toHexString()}`)
+        .expect(200)
+        .expect((res) => {
+            expect(res.body.todo.text).toBe(dummyTodos[0].text);
+        }).end(done); 
+    });
+    
+    it('should return a 404 if todo not found', (done) =>{
+        request(app)
+        .get(`/todos/12345678`)
+        .expect(404)
+        .end(done);
+    });
+    
+
+    it('should return a 404 for non object ids ', (done) =>{
+        //todos/123
+        request(app)
+        .get(`/todos/alphabet`)
+        .expect(404)
+        .end(done);
     });
 });
