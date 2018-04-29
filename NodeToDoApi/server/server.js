@@ -4,8 +4,9 @@ var bodyParser = require('body-parser');
 var {todoSchema, userSchema} = require('../schema');
 var {mongoose,db} = require('./mongoose');
 const _ = require('lodash');
+// const crypto = require('crypto');
 
-var Todo = mongoose.model('Todo', todoSchema);
+var {Todo,User} = require('../schema');
 
 var app = express();
 app.use(bodyParser.json());
@@ -28,6 +29,32 @@ app.post(url, (req,res) => {
 });
 
 
+// POST USERS
+
+var url2 = '/users';
+//var emailString = 'somelabel@example.com'
+//const hash = crypto.createHash('sha512');
+//const password = '12#4afip:'
+//hash.update(password);
+
+
+app.post(url2, (req,res) => {
+    var body = _.pick(req.body, ['email','password']);
+    var user = new User(body); 
+        
+    user.save().then (() =>{
+       return user.generateAuthToken();
+    }).then( (token) => {
+        // jwt token scheme not a standard header
+        res.header('x-auth').send(user);        
+    }).catch( (err)=> {
+       res.status(400).send(err);
+    });
+});
+
+
+/**********************/
+
 // LIST RESOURCES
 app.get(url, (req,res) => {
    Todo.find().then((todos) => {
@@ -37,6 +64,8 @@ app.get(url, (req,res) => {
    });
 });
 
+
+/**********************/
 
 // GET /todos/123456
 var urlParam = url +'/:id';
@@ -61,6 +90,8 @@ app.get(urlParam, (req,res) => {
 });
 
 
+/**********************/
+
 // Delete by ID
 app.delete(urlParam , (req,res)=>{
     // get ID
@@ -82,6 +113,8 @@ app.delete(urlParam , (req,res)=>{
     });
 });
 
+
+/**********************/
 
 // UPDATE
 app.patch(urlParam, (req, res) => {
