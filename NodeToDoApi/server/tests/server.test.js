@@ -40,9 +40,7 @@ describe('POST /todos', () => {
    }); 
     
        
-    it('should fail to create a new todo', (done) => {
-      var text = 'TeSt POST ToDo TeXt';
-       
+    it('should fail to create a new todo', (done) => {       
        request(app)
        .post('/todos')
        .send({})
