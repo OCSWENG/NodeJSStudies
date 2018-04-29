@@ -38,4 +38,24 @@ describe('POST /todos', () => {
            }).catch((e) => done(e));
        });
    }); 
+    
+       
+    it('should fail to create a new todo', (done) => {
+      var text = 'TeSt POST ToDo TeXt';
+       
+       request(app)
+       .post('/todos')
+       .send({})
+       .expect(400)
+       .end((err,res)=> {
+           if(err) {
+               return done(err);
+           }
+           
+           Todo.find().then((todos) => {
+               expect(todos.length).toBe(0);
+               done();
+           }).catch((e) => done(e));
+       });
+   }); 
 });
