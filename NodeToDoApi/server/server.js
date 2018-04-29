@@ -3,6 +3,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var {todoSchema, userSchema} = require('../schema');
 var {mongoose,db} = require('./mongoose');
+const _ = require('lodash');
 
 var Todo = mongoose.model('Todo', todoSchema);
 
@@ -79,6 +80,38 @@ app.delete(urlParam , (req,res)=>{
     }).catch((e) => {
         res.status(400).send(e);
     });
+});
+
+
+// UPDATE
+app.patch(urlParam, (req, res) => {
+  var id = req.params.id;
+  var body = _.pick(req.body, ['text', 'completed']);
+
+  if (!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+
+  if (_.isBoolean(body.completed) && body.completed) {
+    body.completedAt = new Date().getTime();
+  } 
+  else {
+    body.completed = false;
+    body.completedAt = null;
+  }
+
+  Todo.findByIdAndUpdate(id,
+                         {$set: body}, 
+                         {new: true})
+      .then((todo) => {
+        if (!todo) {
+          return res.status(404).send();
+        }
+
+        res.send({todo});
+        }).catch((e) => {
+            res.status(400).send();
+        });
 });
 
 // Kick off the server

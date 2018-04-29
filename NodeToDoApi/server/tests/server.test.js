@@ -12,7 +12,8 @@ const dummyTodos = [{
     text: "First Test TODo"        
     }, {
         _id: mongoose.Types.ObjectId(),
-        text: "2nd Test TODo"        
+        text: "2nd Test TODo",
+        completedAt: 123
 }];
 
 beforeEach((done) => {
@@ -146,3 +147,44 @@ describe('DELETE /todos/ID', () => {
         .end(done);
     });
 });
+
+
+describe('UPDATE /todos/:id', () => {
+  it('should update the todo', (done) => {
+    var id = dummyTodos[0]._id.toHexString();
+    var text = 'Updating ... to new text';
+
+    request(app)
+      .patch(`/todos/${id}`)
+      .send({
+        completed: true,
+        text
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(text);
+        expect(res.body.todo.completed).toBe(true); // check if completedAt is a number
+      })
+      .end(done);
+  });
+
+  it('should clear completedAt when todo is not completed', (done) => {
+    var id = dummyTodos[1]._id.toHexString();
+    var text = 'This should be the new text!!';
+
+    request(app)
+      .patch(`/todos/${id}`)
+      .send({
+        completed: false,
+        text
+      })
+      .expect(200)
+      .expect((res) => {
+        expect(res.body.todo.text).toBe(text);
+        expect(res.body.todo.completed).toBe(false);
+        expect(res.body.todo.completedAt).toBeNull();
+      })
+      .end(done);
+  });
+});
+
