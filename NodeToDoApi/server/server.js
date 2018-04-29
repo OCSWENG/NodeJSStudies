@@ -9,6 +9,8 @@ var app = express();
 app.use(bodyParser.json());
 
 var url = '/todos';
+
+// POST a Todo Schema Object
 app.post(url, (req,res) => {
    //console.log(req.body);
     var userEvent = new Todo ({
@@ -23,9 +25,18 @@ app.post(url, (req,res) => {
     });
 });
 
+
+// LIST RESOURCES
 app.get(url, (req,res) => {
-    res.send('<h1>WELCOME</h1><p><b>THE BOLD STATEMENT</b></p>');
+   Todo.find().then((todos) => {
+       res.send({todos});
+   }, (err)=>{
+       res.status(400).send(err);
+   });
 });
+
+
+// Kick off the server
 
 app.listen(3000, () => {
     console.log('Started on port 3000');    
