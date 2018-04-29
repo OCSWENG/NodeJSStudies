@@ -16,8 +16,6 @@ var todoSchema = new mongoose.Schema({
     } 
 });
 
-
-
 // email, password, user
 var userSchema = new mongoose.Schema({
     email: {

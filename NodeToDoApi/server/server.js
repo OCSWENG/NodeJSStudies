@@ -1,5 +1,3 @@
-
-
 var express = require('express');
 var bodyParser = require('body-parser');
 var {todoSchema, userSchema} = require('../schema');
@@ -55,3 +53,4 @@ db.once('open', function() {
 });
 */
 
+module.exports = {app};
