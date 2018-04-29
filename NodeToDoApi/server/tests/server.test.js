@@ -103,3 +103,46 @@ describe('GET /todos/ID', () => {
         .end(done);
     });
 });
+
+
+describe('DELETE /todos/ID', () => {
+    it('should remove a todo', (done) => {
+        var id = dummyTodos[0]._id.toHexString();
+        request(app)
+        .delete(`/todos/${id}`)
+        .expect(200)
+        .expect((res) => {   
+            expect(res.body.todo._id).toBe(id);
+        }).end((err,res) => {
+            if(err) {
+                return done(err);
+            }
+            // Query Database using FindByID
+            Todo.findById(id).then((todo)=>{
+               expect(todo).toBeNull();
+               done();
+            }).catch((e) => {done(e);});
+        });  
+    });
+
+    it('should return 404 if todo not found', (done) => {
+        var id = mongoose.Types.ObjectId();
+        request(app)
+        .delete(`/todos/${id}`)
+        .expect(404)
+        .end((err,res) => {
+            if(err) {
+                return done(err);
+            }
+            done();
+        }); 
+    });
+    
+
+    it('should return 404 if objectID is invalid', (done) => {
+        request(app)
+        .delete(`/todos/alphabet`)
+        .expect(404)
+        .end(done);
+    });
+});

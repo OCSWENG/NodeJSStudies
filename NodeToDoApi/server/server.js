@@ -60,6 +60,27 @@ app.get(urlParam, (req,res) => {
 });
 
 
+// Delete by ID
+app.delete(urlParam , (req,res)=>{
+    // get ID
+    var id = req.params.id;
+    
+    // Validate ID
+    if(!ObjectID.isValid(id)) {
+        return res.status(404).send("Objectid is not valid");
+    }
+    
+    // todo remove by id
+    Todo.findByIdAndRemove(id).then((todo) => {
+        if(!todo){
+            return res.status(404).send("No TODO");
+        }
+        res.send({todo});
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+});
+
 // Kick off the server
 
 app.listen(3000, () => {
