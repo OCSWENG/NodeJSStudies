@@ -1,3 +1,4 @@
+const {ObjectID} = require('mongodb');
 var express = require('express');
 var bodyParser = require('body-parser');
 var {todoSchema, userSchema} = require('../schema');
@@ -33,6 +34,27 @@ app.get(url, (req,res) => {
    }, (err)=>{
        res.status(400).send(err);
    });
+});
+
+
+// GET /todos/123456
+var urlParam = url +':id';
+app.get(urlParam, (req,res) => {
+   var id = req.params.id;
+    if(!ObjectID.isValid(id)){
+        return res.status(404).send("Objectid is not valid");
+    }
+    
+    Todo.findById(id).then((todo) => {
+        if( !todo){
+            return res.status(404).send("Todo Find by Id Not Found");
+    }
+
+        res.status(200).send({todo});
+        
+    }).catch( (e) => {
+        res.status(400).send(e);
+    });
 });
 
 
