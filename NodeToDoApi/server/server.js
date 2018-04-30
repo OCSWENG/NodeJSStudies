@@ -51,8 +51,25 @@ app.post(url2, (req,res) => {
     });
 });
 
-/**********************/
+// POST /users/login {email,password}
 
+var url3 = url2+'/login';
+app.post(url3, (req,res)=> { 
+    // pick email password
+    var body = _.pick(req.body, ['email','password']);
+    // use POSTMAN to verify res.send(body);
+    //userSchema.statics.findByCredentials = function(email, password){
+ 
+    User.findByCredentials(body.email, body.password).then((user) => {
+        user.generateAuthToken().then( (token) => {
+            res.header('x-auth',token).send(user); 
+        });
+    }).catch((e) => {
+       res.status(400).send();      
+    });
+});
+
+/**********************/
 // LIST RESOURCES
 app.get(url, (req,res) => {
    Todo.find().then((todos) => {
