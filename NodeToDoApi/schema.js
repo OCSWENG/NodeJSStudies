@@ -70,6 +70,23 @@ userSchema.methods.generateAuthToken = function () {
   });
 };
 
+userSchema.statics.findByToken = function(token) {
+    var User = this;
+    var decoded;
+    
+    // throw an error if anything goes wrong
+    try {
+        decoded = jwt.verify(token, 'abc123');
+    } catch(e) {
+        return new Promise.reject();
+    }
+    
+    return User.findOne ({
+        _id: decoded._id,
+        'tokens.token' : token,
+        'tokens.access' : 'auth'
+    });
+};
 
 var Todo = mongoose.model('Todo', todoSchema);
 var User = mongoose.model('User', userSchema);

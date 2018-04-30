@@ -4,6 +4,8 @@ var bodyParser = require('body-parser');
 var {todoSchema, userSchema} = require('../schema');
 var {mongoose,db} = require('./mongoose');
 const _ = require('lodash');
+var {authenticate} = require('../middleware/authenticate');
+
 // const crypto = require('crypto');
 
 var {Todo,User} = require('../schema');
@@ -28,15 +30,12 @@ app.post(url, (req,res) => {
     });
 });
 
-
 // POST USERS
-
 var url2 = '/users';
 //var emailString = 'somelabel@example.com'
 //const hash = crypto.createHash('sha512');
 //const password = '12#4afip:'
 //hash.update(password);
-
 
 app.post(url2, (req,res) => {
     var body = _.pick(req.body, ['email','password']);
@@ -51,7 +50,6 @@ app.post(url2, (req,res) => {
        res.status(400).send(err);
     });
 });
-
 
 /**********************/
 
@@ -72,7 +70,6 @@ var urlParam = url +'/:id';
 app.get(urlParam, (req,res) => {
    var id = req.params.id;
     if(!ObjectID.isValid(id)){
-        
         return res.status(404).send("Objectid is not valid");
     }
     
@@ -81,7 +78,6 @@ app.get(urlParam, (req,res) => {
         if(!todo){
             return res.status(404).send("Todo Find by Id Not Found");
     }
-
         res.status(200).send({todo});
         
     }).catch( (e) => {
@@ -89,6 +85,11 @@ app.get(urlParam, (req,res) => {
     });
 });
 
+
+//PRIVATE ROUTE
+app.get('/users/me', authenticate, (req,res) => {
+    res.send(req,user);
+});
 
 /**********************/
 
@@ -112,7 +113,6 @@ app.delete(urlParam , (req,res)=>{
         res.status(400).send(e);
     });
 });
-
 
 /**********************/
 
