@@ -93,20 +93,23 @@ userSchema.statics.findByToken = function(token) {
 
 // must call next to prevent a crash
 userSchema.pre('save', function (next){
-    var user = this;
-    
+   var user = this;
     if ( user.isModified('password')) {
         bcrypt.genSalt(10, (err,salt) => {
                 bcrypt.hash(user.password, salt, (err,hash) => {
+                    console.log(user.password);
                     user.password = hash;
-            });
+                    console.log(user.password);
+                    // without this line the password is not saved.
+                    next();
+            });        
         });
 
    //     bcrypt.compare(password, hashedPassword, (err,res) => {
     //        console.log(res);
     //    });   
-        next();
-    }else {
+
+    } else {
         next();
     }
 });

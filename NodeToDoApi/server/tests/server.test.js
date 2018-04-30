@@ -5,21 +5,10 @@ const {app} = require('../server');
 var {Todo, User} = require('../../schema');
 var {mongoose,db} = require('../mongoose');
 
+const {dummyTodos, populateTodos, dummyUsers, populateUsers} = require ('./seed');
 
-const dummyTodos = [{
-    _id: mongoose.Types.ObjectId(),
-    text: "First Test TODo"        
-    }, {
-        _id: mongoose.Types.ObjectId(),
-        text: "2nd Test TODo",
-        completedAt: 123
-}];
-
-beforeEach((done) => {
-    Todo.remove({}).then(() => {
-        return Todo.insertMany(dummyTodos);
-    }).then(()=> {done();});
-});
+beforeEach(populateUsers);
+beforeEach(populateTodos);
 
 describe('POST /todos', () => {
     
