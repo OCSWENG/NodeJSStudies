@@ -81,7 +81,7 @@ userSchema.statics.findByToken = function(token) {
     try {
         decoded = jwt.verify(token, 'abc123');
     } catch(e) {
-        return new Promise.reject();
+        return Promise.reject();
     }
     
     return User.findOne ({
@@ -97,9 +97,7 @@ userSchema.pre('save', function (next){
     if ( user.isModified('password')) {
         bcrypt.genSalt(10, (err,salt) => {
                 bcrypt.hash(user.password, salt, (err,hash) => {
-                    console.log(user.password);
                     user.password = hash;
-                    console.log(user.password);
                     // without this line the password is not saved.
                     next();
             });        

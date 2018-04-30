@@ -176,3 +176,36 @@ describe('UPDATE /todos/:id', () => {
   });
 });
 
+describe ('GET /users/me', ()=>{
+    it( 'It should return user if Valid authentication', (done) => {
+        request(app)
+        .get('/users/me')
+        .set('x-auth', dummyUsers[0].tokens[0].token)
+        .expect(200)
+        .expect((res) => {
+            expect(res.body._id).toBe(dummyUsers[0]._id.toHexString());
+            expect(res.body.email).toBe(dummyUsers[0].email)
+        }).end(done);
+    });
+    
+    it( 'It should return 401 if InValid authentication', (done) => {
+        request(app)
+        .get('/users/me')
+        .set('x-auth', 'abcdef1234')
+       .expect(401)
+        .expect((res) => {
+            expect(res.body).toEqual({});
+        })
+        .end(done);
+    });
+    
+        it( 'It should return 401 if no authentication', (done) => {
+        request(app)
+        .get('/users/me')
+       .expect(401)
+        .expect((res) => {
+            expect(res.body).toEqual({});
+        })
+        .end(done);
+    });
+});

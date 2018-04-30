@@ -88,7 +88,7 @@ app.get(urlParam, (req,res) => {
 
 //PRIVATE ROUTE
 app.get('/users/me', authenticate, (req,res) => {
-    res.send(req,user);
+       res.send(req.user);
 });
 
 /**********************/
