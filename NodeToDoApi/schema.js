@@ -2,6 +2,8 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const jwt = require('jsonwebtoken');
 const _ = require('lodash');
+const bcrypt = require('bcryptjs');
+
 var todoSchema = new mongoose.Schema({
     text: {
         type: String,
@@ -21,6 +23,7 @@ var todoSchema = new mongoose.Schema({
 
 
 // email, password, user
+// mongoose middleware 
 var userSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -87,6 +90,26 @@ userSchema.statics.findByToken = function(token) {
         'tokens.access' : 'auth'
     });
 };
+
+// must call next to prevent a crash
+userSchema.pre('save', function (next){
+    var user = this;
+    
+    if ( user.isModified('password')) {
+        bcrypt.genSalt(10, (err,salt) => {
+                bcrypt.hash(user.password, salt, (err,hash) => {
+                    user.password = hash;
+            });
+        });
+
+   //     bcrypt.compare(password, hashedPassword, (err,res) => {
+    //        console.log(res);
+    //    });   
+        next();
+    }else {
+        next();
+    }
+});
 
 var Todo = mongoose.model('Todo', todoSchema);
 var User = mongoose.model('User', userSchema);
