@@ -114,5 +114,5 @@ userSchema.pre('save', function (next){
 var Todo = mongoose.model('Todo', todoSchema);
 var User = mongoose.model('User', userSchema);
 
-module.exports.todo = {Todo};
-module.exports.user = {User};
+module.exports.Todo = Todo;
+module.exports.User = User;

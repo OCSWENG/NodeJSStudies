@@ -2,10 +2,9 @@ const request = require('supertest');
 const expect = require('expect');
 const {ObjectID}  = require('mongoose');
 const {app} = require('../server');
-var {todoSchema, userSchema} = require('../../schema');
+var {Todo, User} = require('../../schema');
 var {mongoose,db} = require('../mongoose');
 
-var Todo = mongoose.model('Todo', todoSchema);
 
 const dummyTodos = [{
     _id: mongoose.Types.ObjectId(),
