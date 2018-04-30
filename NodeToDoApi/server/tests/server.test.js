@@ -177,7 +177,7 @@ describe('UPDATE /todos/:id', () => {
 });
 
 describe ('GET /users/me', ()=>{
-    it( 'It should return user if Valid authentication', (done) => {
+    it( 'should return user if Valid authentication', (done) => {
         request(app)
         .get('/users/me')
         .set('x-auth', dummyUsers[0].tokens[0].token)
@@ -188,7 +188,7 @@ describe ('GET /users/me', ()=>{
         }).end(done);
     });
     
-    it( 'It should return 401 if InValid authentication', (done) => {
+    it( 'should return 401 if InValid authentication', (done) => {
         request(app)
         .get('/users/me')
         .set('x-auth', 'abcdef1234')
@@ -199,7 +199,7 @@ describe ('GET /users/me', ()=>{
         .end(done);
     });
     
-        it( 'It should return 401 if no authentication', (done) => {
+        it( 'should return 401 if no authentication', (done) => {
         request(app)
         .get('/users/me')
        .expect(401)
@@ -207,5 +207,67 @@ describe ('GET /users/me', ()=>{
             expect(res.body).toEqual({});
         })
         .end(done);
+    });
+});
+
+
+describe('POST /users', ()=> {
+    it('should create a user',(done) =>{
+        var email = 'someid@example.com';
+        var password = '4ome4a44word';
+        
+        request(app)
+        .post('/users')
+        .send({email,password})
+        .expect(200)
+        .expect((res) =>{
+            expect(res.headers['x-auth']).toExist;
+            expect(res.body.email).toBe(email);
+        }).end( (err)=>{
+            
+            if(err){
+                return done(err);
+            }
+            
+            User.findOne({email}).then( (user)=>{
+                expect(user).toExist;
+                // should be a hash
+                expect(user.password).not.toBe(password);
+                done();
+            });
+        });        
+    });
+    it('should return validation errors if request is invalid email',(done) =>{
+        var email = 'someid@.com';
+        var password = '4ome4a44word';
+        
+        request(app)
+        .post('/users')
+        .send({email,password})
+        .expect(400)
+        .end(done);
+        
+    });
+    it('should return validation errors if request is invalid password',(done) =>{
+        var email = 'someid@example.com';
+        var password = 'word';
+        request(app)
+        .post('/users')
+        .send({email,password})
+        .expect(400)
+        .end(done);
+        
+    });
+    it('should not create user if email in use',(done) =>{
+        var email = dummyUsers[0].email;
+        var password = '4ome4a44word';
+        request(app)
+        .post('/users')
+        .send({email,password})
+        .expect(400)
+        .expect((res) =>{
+            expect(res.headers['x-auth']).toExist;
+            expect(res.body.email).toBe(undefined);
+        }).end(done);   
     });
 });
