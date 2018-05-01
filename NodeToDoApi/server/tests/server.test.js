@@ -34,7 +34,7 @@ describe('POST /todos', () => {
                done();
            }).catch((e) => done(e));
        });
-   }); 
+   });
     
        
     it('should fail to create a new todo', (done) => {       
@@ -52,7 +52,7 @@ describe('POST /todos', () => {
                done();
            }).catch((e) => done(e));
        });
-   }); 
+   });
 });
 
 describe('GET /todos', () => {
@@ -234,9 +234,10 @@ describe('POST /users', ()=> {
                 // should be a hash
                 expect(user.password).not.toBe(password);
                 done();
-            });
+            }).catch((e) =>done(e));
         });        
     });
+    
     it('should return validation errors if request is invalid email',(done) =>{
         var email = 'someid@.com';
         var password = '4ome4a44word';
@@ -245,9 +246,9 @@ describe('POST /users', ()=> {
         .post('/users')
         .send({email,password})
         .expect(400)
-        .end(done);
-        
+        .end(done);     
     });
+    
     it('should return validation errors if request is invalid password',(done) =>{
         var email = 'someid@example.com';
         var password = 'word';
@@ -255,9 +256,9 @@ describe('POST /users', ()=> {
         .post('/users')
         .send({email,password})
         .expect(400)
-        .end(done);
-        
+        .end(done);    
     });
+    
     it('should not create user if email in use',(done) =>{
         var email = dummyUsers[0].email;
         var password = '4ome4a44word';
@@ -270,4 +271,55 @@ describe('POST /users', ()=> {
             expect(res.body.email).toBe(undefined);
         }).end(done);   
     });
+});
+
+
+
+describe('POST /users/login', () =>{
+   it('should login the user and return auth token', (done)=>{
+       request(app)
+       .post('/users/login')
+       .send({
+           email: dummyUsers[1].email,
+           password: dummyUsers[1].password
+       })
+       .expect(200)
+       .expect((res) => {
+           expect(res.headers['x-auth']).toExist
+       })
+       .end((err,res) => {
+           if(err){
+               return done(err);
+           }
+           
+           User.findById(dummyUsers[1]._id).then((user) => {
+               expect(user.tokens[0]).toContain({
+                   access: 'auth',
+                   token: res.headers['x-auth']
+               });
+               done();
+           }).catch((e) =>done(e));
+       });
+   });
+    
+    it('should reject an invalid login' , (done) => {
+        request(app)
+       .post('/users/login')
+       .send({
+           email: dummyUsers[1].email,
+           password: "23eed"
+       })
+       .expect(400)
+       .expect((res) => {
+           expect(res.headers['x-auth']).not.toExist
+           expect(res.body).not.toExist            
+       })
+       .end((err,res) => {
+           if(err){
+               return done(err);
+           }
+            return done();
+       });       
+    });
+    
 });

@@ -94,9 +94,9 @@ userSchema.statics.findByToken = function(token) {
 userSchema.statics.findByCredentials = function(email, password){
     var User = this;
     
-    User.findOne({email}).then((user) => {
+    return User.findOne({email}).then((user) => {
        if(!user) {
-         return Promise.reject;  
+         return new Promise.reject();  
        }
    
         return new Promise((resolve, reject) => {
