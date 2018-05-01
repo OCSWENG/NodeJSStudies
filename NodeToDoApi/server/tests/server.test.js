@@ -13,8 +13,7 @@ beforeEach(populateTodos);
 describe('POST /todos', () => {
     
    it('should create a new todo', (done) => {
-      var text = 'TeSt POST ToDo TeXt';
-       
+      var text = 'TeSt POST ToDo TeXt';    
        request(app)
        .post('/todos')
        .send({text})
@@ -83,7 +82,6 @@ describe('GET /todos/ID', () => {
         .end(done);
     });
     
-
     it('should return a 404 for non object ids ', (done) =>{
         //todos/123
         request(app)
@@ -92,7 +90,6 @@ describe('GET /todos/ID', () => {
         .end(done);
     });
 });
-
 
 describe('DELETE /todos/ID', () => {
     it('should remove a todo', (done) => {
@@ -127,7 +124,6 @@ describe('DELETE /todos/ID', () => {
         }); 
     });
     
-
     it('should return 404 if objectID is invalid', (done) => {
         request(app)
         .delete(`/todos/alphabet`)
@@ -273,8 +269,6 @@ describe('POST /users', ()=> {
     });
 });
 
-
-
 describe('POST /users/login', () =>{
    it('should login the user and return auth token', (done)=>{
        request(app)
@@ -322,4 +316,24 @@ describe('POST /users/login', () =>{
        });       
     });
     
+});
+
+describe('DELETE /users/me/token', () =>{
+    it('should remove auth token on logout', (done) => {
+       request(app)
+        .delete('/users/me/token')
+        .set('x-auth', dummyUsers[0].tokens[0].token)
+        .expect(200)
+        .end((err,res) => {
+           if(err){
+               return done(err);
+           }
+           
+           User.findById(dummyUsers[0]._id).then((user) => {
+              expect(user.tokens.length).toEqual(0); 
+           }).catch((e) =>done(e));
+           
+           return done();
+       });        
+    });
 });
