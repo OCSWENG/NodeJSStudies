@@ -16,6 +16,7 @@ describe('POST /todos', () => {
       var text = 'TeSt POST ToDo TeXt';    
        request(app)
        .post('/todos')
+       .set('x-auth', dummyUsers[0].tokens[0].token)
        .send({text})
        .expect(200)
        .expect((res) => {
@@ -29,7 +30,6 @@ describe('POST /todos', () => {
            Todo.find({text}).then((todos) => {
                expect(todos.length).toBe(1);
                expect(todos[0].text).toBe(text);
-               console.log(JSON.stringify(todos, undefined,2));
                done();
            }).catch((e) => done(e));
        });
@@ -39,6 +39,7 @@ describe('POST /todos', () => {
     it('should fail to create a new todo', (done) => {       
        request(app)
        .post('/todos')
+        .set('x-auth', dummyUsers[0].tokens[0].token)
        .send({})
        .expect(400)
        .end((err,res)=> {
@@ -54,30 +55,42 @@ describe('POST /todos', () => {
    });
 });
 
+
 describe('GET /todos', () => {
     it('should list all todo', (done) => { 
         request(app)
         .get('/todos')
+        .set('x-auth', dummyUsers[0].tokens[0].token)
         .expect(200)
         .expect((res) => {
-            expect(res.body.todos.length).toBe(2);
+            expect(res.body.todos.length).toBe(1);
         }).end(done);
     });
 });
 
-describe('GET /todos/ID', () => {
+describe('GET /todos/:id', () => {
     it('should get a Todo using a valid ID', (done) =>{
         request(app)
         .get(`/todos/${dummyTodos[0]._id.toHexString()}`)
+        .set('x-auth', dummyUsers[0].tokens[0].token)
         .expect(200)
         .expect((res) => {
             expect(res.body.todo.text).toBe(dummyTodos[0].text);
         }).end(done); 
     });
     
+    it('should not get a Todo using a in valid ID', (done) =>{
+        request(app)
+        .get(`/todos/${dummyTodos[1]._id.toHexString()}`)
+        .set('x-auth', dummyUsers[0].tokens[0].token)
+        .expect(404)
+        .end(done); 
+    });
+    
     it('should return a 404 if todo not found', (done) =>{
         request(app)
         .get(`/todos/12345678`)
+        .set('x-auth', dummyUsers[0].tokens[0].token)
         .expect(404)
         .end(done);
     });
@@ -86,16 +99,18 @@ describe('GET /todos/ID', () => {
         //todos/123
         request(app)
         .get(`/todos/alphabet`)
+        .set('x-auth', dummyUsers[0].tokens[0].token)
         .expect(404)
         .end(done);
     });
 });
 
-describe('DELETE /todos/ID', () => {
+describe('DELETE /todos/:id', () => {
     it('should remove a todo', (done) => {
         var id = dummyTodos[0]._id.toHexString();
         request(app)
         .delete(`/todos/${id}`)
+        .set('x-auth', dummyUsers[0].tokens[0].token)
         .expect(200)
         .expect((res) => {   
             expect(res.body.todo._id).toBe(id);
@@ -115,6 +130,7 @@ describe('DELETE /todos/ID', () => {
         var id = mongoose.Types.ObjectId();
         request(app)
         .delete(`/todos/${id}`)
+        .set('x-auth', dummyUsers[0].tokens[0].token)
         .expect(404)
         .end((err,res) => {
             if(err) {
@@ -127,6 +143,7 @@ describe('DELETE /todos/ID', () => {
     it('should return 404 if objectID is invalid', (done) => {
         request(app)
         .delete(`/todos/alphabet`)
+        .set('x-auth', dummyUsers[0].tokens[0].token)
         .expect(404)
         .end(done);
     });
@@ -140,6 +157,7 @@ describe('UPDATE /todos/:id', () => {
 
     request(app)
       .patch(`/todos/${id}`)
+      .set('x-auth', dummyUsers[0].tokens[0].token)
       .send({
         completed: true,
         text
@@ -158,6 +176,7 @@ describe('UPDATE /todos/:id', () => {
 
     request(app)
       .patch(`/todos/${id}`)
+      .set('x-auth', dummyUsers[1].tokens[0].token)
       .send({
         completed: false,
         text
@@ -287,10 +306,10 @@ describe('POST /users/login', () =>{
            }
            
            User.findById(dummyUsers[1]._id).then((user) => {
-               expect(user.tokens[0]).toContain({
+               expect(user.tokens[1]).toContain({
                    access: 'auth',
                    token: res.headers['x-auth']
-               });
+               }).catch((e) =>done(e));
                done();
            }).catch((e) =>done(e));
        });

@@ -16,9 +16,10 @@ app.use(bodyParser.json());
 var url = '/todos';
 
 // POST a Todo Schema Object
-app.post(url, (req,res) => {
+app.post(url, authenticate, (req,res) => {
    //console.log(req.body);
     var userEvent = new Todo ({
+        owner: req.user._id,
         text: req.body.text,
         completed: false
     });
@@ -70,32 +71,31 @@ app.post(url3, (req,res)=> {
 });
 
 /**********************/
-// LIST RESOURCES
-app.get(url, (req,res) => {
-   Todo.find().then((todos) => {
+// LIST RESOURCES of the current user
+app.get(url, authenticate, (req,res) => {    
+   Todo.find({owner: req.user._id}).then((todos) => {
        res.send({todos});
    }, (err)=>{
        res.status(400).send(err);
    });
 });
 
-
 /**********************/
 
 // GET /todos/123456
 var urlParam = url +'/:id';
-app.get(urlParam, (req,res) => {
+app.get(urlParam, authenticate,(req,res) => {
    var id = req.params.id;
     if(!ObjectID.isValid(id)){
         return res.status(404).send("Objectid is not valid");
     }
     
-    Todo.findById(id).then((todo) => {
+    Todo.findOne({_id: id, owner: req.user._id}).then((todo) => {
         console.log("Find by id returned : " + todo);
         if(!todo){
             return res.status(404).send("Todo Find by Id Not Found");
     }
-        res.status(200).send({todo});
+        res.send({todo});
         
     }).catch( (e) => {
         res.status(400).send(e);
@@ -111,17 +111,16 @@ app.get('/users/me', authenticate, (req,res) => {
 /**********************/
 
 // Delete by ID
-app.delete(urlParam , (req,res)=>{
+app.delete(urlParam , authenticate, (req,res)=>{
     // get ID
     var id = req.params.id;
-    
     // Validate ID
     if(!ObjectID.isValid(id)) {
         return res.status(404).send("Objectid is not valid");
     }
     
     // todo remove by id
-    Todo.findByIdAndRemove(id).then((todo) => {
+    Todo.findOneAndRemove({_id: id, owner: req.user.id}).then((todo) => {
         if(!todo){
             return res.status(404).send("No TODO");
         }
@@ -144,7 +143,7 @@ app.delete('/users/me/token', authenticate, (req,res) => {
 /**********************/
 
 // UPDATE
-app.patch(urlParam, (req, res) => {
+app.patch(urlParam, authenticate, (req, res) => {
   var id = req.params.id;
   var body = _.pick(req.body, ['text', 'completed']);
 
@@ -160,7 +159,7 @@ app.patch(urlParam, (req, res) => {
     body.completedAt = null;
   }
 
-  Todo.findByIdAndUpdate(id,
+  Todo.findOneAndUpdate({_id: id, owner: req.user._id},
                          {$set: body}, 
                          {new: true})
       .then((todo) => {

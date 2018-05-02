@@ -5,6 +5,10 @@ const _ = require('lodash');
 const bcrypt = require('bcryptjs');
 
 var todoSchema = new mongoose.Schema({
+    owner: {
+        type: mongoose.Schema.Types.ObjectId,
+        required : true
+    },
     text: {
         type: String,
         required: true,
@@ -76,7 +80,7 @@ userSchema.methods.generateAuthToken = function () {
 
 userSchema.methods.removeToken = function (token) {
     var user = this;
-    return user.Update ({
+    return user.update ({
        $pull: {
            tokens: {token}
        }

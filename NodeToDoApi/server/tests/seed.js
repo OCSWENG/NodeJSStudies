@@ -29,9 +29,11 @@ const dummyUsers = [{
 
 const dummyTodos = [{
     _id: mongoose.Types.ObjectId(),
+    owner: user1Id,
     text: "First Test TODo"        
     }, {
         _id: mongoose.Types.ObjectId(),
+        owner: user2Id,
         text: "2nd Test TODo",
         completedAt: 123
 }];
