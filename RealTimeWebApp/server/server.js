@@ -12,20 +12,28 @@ var app = express();
 
 var server = http.createServer(app);
 
+app.use(express.static(pathToPublic));
 
 // websocket server
 var io = socketIO(server);
 // listen for a new connection then do the following
 io.on('connection', (socket) =>{
-   console.log('new user connected'); 
+   console.log('new user connected');
+        
+    socket.emit('newMessage', {
+        from : 'someName@example.com',
+        text : 'blah blah blah',
+        createAt: 123    
+    });
+    
+    socket.on('createMessage', (message)=>{
+       console.log('createMessage : ${message}'); 
+    });
+    
+    socket.on('disconnect', (socket) => {
+        console.log('Client disconnected');
+    });    
 });
-
-io.on('disconnect', (socket) => {
-    console.log('Client disconnected');
-});
-
-
-app.use(express.static(pathToPublic));
 
 
 server.listen(port, () => {
