@@ -20,14 +20,35 @@ var io = socketIO(server);
 io.on('connection', (socket) =>{
    console.log('new user connected');
         
-    socket.emit('newMessage', {
-        from : 'someName@example.com',
-        text : 'blah blah blah',
-        createAt: 123    
-    });
-    
     socket.on('createMessage', (message)=>{
        console.log('createMessage : ${message}'); 
+        
+        socket.emit('newMessage',{
+            from: 'Admin',
+            text: 'Welcome to chatterBox',
+            createdAt: new Date().getTime()            
+        });
+        
+        socket.broadcast.emit('newMessage',{
+            from: 'Admin',
+            text: 'User X has joined',
+            createdAt: new Date().getTime()            
+        });
+        
+        // emit to all those who subscribed
+        // to every connection
+        io.emit('newMessage',{
+            from: message.from,
+            text: message.text,
+            createdAt: new Date().getTime();
+        });
+        
+        // everybody except this socket
+//        socket.broadcast.emit('newMessage',{
+//            from: message.from,
+//            text: message.text,
+//            createdAt: new Date().getTime()
+//        });        
     });
     
     socket.on('disconnect', (socket) => {
