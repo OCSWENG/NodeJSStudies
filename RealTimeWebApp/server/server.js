@@ -38,9 +38,7 @@ io.on('connection', (socket) =>{
                 generateMessage(message.from,
                                 message.text);
         );
-        callback({
-            text: 'This is from the server'
-        });
+        callback();
     );
         
         // everybody except this socket

@@ -28,14 +28,17 @@ socket.on('newLocationMessage', function(message){
     jQuery('#messages').append(li);
 });
 
+var msgTextBox = jQuery('[name=message]');
+
 jQuery('#message-form').on('submit', function(e) {
     // this is stop sending data on the URI
     e.preventDefault();
     socket.emit('createMessage', {
         from: 'User',
-        text: jQuery('[name-message]').val()        
+        text: msgTextBox.val()        
     }, function () {
         
+        msgTextBox.val('');
     });
 });
 
@@ -46,16 +49,20 @@ locationBtn.on('click',function(){
        return alert("GeoLocation is not Avialable");
    }
     
+    locationBtn.attr('disabled','disabled').text('sending location ....');
+    
     // success , failure
     navigator.geolocation.getCurrentPosition(
         function(){
+            locationBtn.removeAttr('disabled').text('Send Location');
             socket.emit('createLocationMessage', {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude
-            });
+            });            
     },                                    
         function(){
-        alert('Unable to retrieve Location');
+            locationBtn.removeAttr('disabled').text('Send Location');
+            alert('Unable to retrieve Location');
     });    
     
 });
