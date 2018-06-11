@@ -20,24 +20,28 @@ var io = socketIO(server);
 // listen for a new connection then do the following
 io.on('connection', (socket) =>{
    console.log('new user connected');
+ 
+    socket.emit('newMessage',
+                generateMessage('Admin','Welcome to chatterBox'); 
+ 
+    socket.broadcast.emit('newMessage',
+                generateMessage('Admin',
+                'User X has joined');    
+    );
+
+    socket.on('createMessage', (message,callback)=>{
         
-    socket.on('createMessage', (message)=>{
         console.log('createMessage : ${message}'); 
-        socket.emit('newMessage',
-                    generateMessage('Admin','Welcome to chatterBox');           
-        );
-        
-        socket.broadcast.emit('newMessage',
-                              generateMessage('Admin',
-            'User X has joined');
-        );
-        
         // emit to all those who subscribed
         // to every connection
         io.emit('newMessage',
                 generateMessage(message.from,
                                 message.text);
         );
+        callback({
+            text: 'This is from the server'
+        });
+    );
         
         // everybody except this socket
 //        socket.broadcast.emit('newMessage',{
