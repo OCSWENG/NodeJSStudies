@@ -3,6 +3,7 @@ const path = require('path');
 const http = require('http');
 const express = require('express');
 const socketIO = require('socket.io');
+const {generateMessage} = require('./utils/message');
 
 const port = process.env.PORT || 3000;
 
@@ -21,27 +22,22 @@ io.on('connection', (socket) =>{
    console.log('new user connected');
         
     socket.on('createMessage', (message)=>{
-       console.log('createMessage : ${message}'); 
+        console.log('createMessage : ${message}'); 
+        socket.emit('newMessage',
+                    generateMessage('Admin','Welcome to chatterBox');           
+        );
         
-        socket.emit('newMessage',{
-            from: 'Admin',
-            text: 'Welcome to chatterBox',
-            createdAt: new Date().getTime()            
-        });
-        
-        socket.broadcast.emit('newMessage',{
-            from: 'Admin',
-            text: 'User X has joined',
-            createdAt: new Date().getTime()            
-        });
+        socket.broadcast.emit('newMessage',
+                              generateMessage('Admin',
+            'User X has joined');
+        );
         
         // emit to all those who subscribed
         // to every connection
-        io.emit('newMessage',{
-            from: message.from,
-            text: message.text,
-            createdAt: new Date().getTime();
-        });
+        io.emit('newMessage',
+                generateMessage(message.from,
+                                message.text);
+        );
         
         // everybody except this socket
 //        socket.broadcast.emit('newMessage',{
