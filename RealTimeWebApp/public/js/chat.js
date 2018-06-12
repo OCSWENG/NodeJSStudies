@@ -23,8 +23,17 @@ function scrollToBottom ( ) {
 
 
 socket.on('connect',function ( ) {
-    console.log('Connected to server');   
-
+    var params = jQuery.deparam(window.location.search);
+    
+    socket.emit('join', params, function(err)=>{
+        if(err){
+            alert(err);
+            // redirect to home page
+            window.location.href='/';
+        } else {
+            console.log('NO ERROR');
+        }    
+    });
 });
 
 socket.on('disconnect', function ( ) {

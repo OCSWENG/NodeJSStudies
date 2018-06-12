@@ -5,6 +5,9 @@ const express = require('express');
 const socketIO = require('socket.io');
 const {generateMessage, generateLocationMessage} = require('./utils/message');
 
+const {isRealString} = require('./utils/validate');
+
+
 const port = process.env.PORT || 3000;
 
 const pathToPublic = path.join(__dirname, '..','/public');
@@ -15,20 +18,47 @@ var server = http.createServer(app);
 
 app.use(express.static(pathToPublic));
 
+
 // websocket server
 var io = socketIO(server);
 // listen for a new connection then do the following
 io.on('connection', (socket) =>{
    console.log('new user connected');
  
-    socket.emit('newMessage',
+
+
+    socket.on('join', (params,callback) =>{
+        // params name and room
+        // callback acknowledge 
+        if(!isRealString(params.name) || !isRealString(params.room)){
+            callback('Name and Room name must be alphanumeric')            
+        }
+        
+        socket.join(params.room);
+        // socket.leave(params.room);
+        // Target specific users
+        // every connected user
+        // io.emit 
+        // sends every connected except the current user
+        // socket.broadcast.emit
+        // send to one user
+        // socket.emit
+        
+        // io.emit() -> io.to('').emit()
+        // socket.broadcast.to('').emit()
+        
+               
+        socket.emit('newMessage',
                 generateMessage('Admin','Welcome to chatterBox'); 
  
-    socket.broadcast.emit('newMessage',
+        socket.broadcast.to(params.room).emit('newMessage',
                 generateMessage('Admin',
-                'User X has joined');    
+                '${params.name} has joined');    
     );
-
+        
+        callback();
+    });
+    
     socket.on('createMessage', (message,callback)=>{
         
         console.log('createMessage : ${message}'); 
