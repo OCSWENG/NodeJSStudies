@@ -7,17 +7,16 @@ const {generateMessage, generateLocationMessage} = require('./utils/message');
 
 const {isRealString} = require('./utils/validate');
 
+const {Users} = require('./utils/users');
+
+
 
 const port = process.env.PORT || 3000;
-
 const pathToPublic = path.join(__dirname, '..','/public');
-
 var app = express();
-
 var server = http.createServer(app);
-
 app.use(express.static(pathToPublic));
-
+var users = new Users();
 
 // websocket server
 var io = socketIO(server);
@@ -35,6 +34,12 @@ io.on('connection', (socket) =>{
         }
         
         socket.join(params.room);
+        users.removeUser(socket.id);
+        users.addUser(params.id, params.name, params.room);
+      
+        io.to(param.room).emit('updateUserList', users.getUserList(params.room));
+        
+        
         // socket.leave(params.room);
         // Target specific users
         // every connected user
@@ -85,6 +90,14 @@ io.on('connection', (socket) =>{
     
     socket.on('disconnect', (socket) => {
         console.log('Client disconnected');
+        
+        var user = users.removeUser(socket.id);
+        if (user){
+            io.to(user.room).emit('updateUserList', users.getUserList(user.room));
+            io.to(user.room).emit('newMessage', 
+                                  generateMessage('Admin','${user.name} has left'));
+            
+        }
     });    
 });
 
