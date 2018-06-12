@@ -6,10 +6,7 @@ const socketIO = require('socket.io');
 const {generateMessage, generateLocationMessage} = require('./utils/message');
 
 const {isRealString} = require('./utils/validate');
-
 const {Users} = require('./utils/users');
-
-
 
 const port = process.env.PORT || 3000;
 const pathToPublic = path.join(__dirname, '..','/public');
@@ -24,8 +21,6 @@ var io = socketIO(server);
 io.on('connection', (socket) =>{
    console.log('new user connected');
  
-
-
     socket.on('join', (params,callback) =>{
         // params name and room
         // callback acknowledge 
@@ -39,7 +34,6 @@ io.on('connection', (socket) =>{
       
         io.to(param.room).emit('updateUserList', users.getUserList(params.room));
         
-        
         // socket.leave(params.room);
         // Target specific users
         // every connected user
@@ -51,7 +45,6 @@ io.on('connection', (socket) =>{
         
         // io.emit() -> io.to('').emit()
         // socket.broadcast.to('').emit()
-        
                
         socket.emit('newMessage',
                 generateMessage('Admin','Welcome to chatterBox'); 
@@ -66,13 +59,16 @@ io.on('connection', (socket) =>{
     
     socket.on('createMessage', (message,callback)=>{
         
-        console.log('createMessage : ${message}'); 
-        // emit to all those who subscribed
-        // to every connection
-        io.emit('newMessage',
-                generateMessage(message.from,
-                                message.text);
-        );
+        var user = users.getUser(socket.id);
+        if(user && isRealString(message.text)) {
+            // emit to all those who subscribed
+            // to every connection
+            io.to(user.room).emit('newMessage',
+                    generateMessage(user.name,
+                                    message.text);
+            );
+        }
+        
         callback();
     );
         
@@ -84,8 +80,11 @@ io.on('connection', (socket) =>{
 //        });        
     });
     
-    socket.on('createLocationMessage', (coords) => {
-       io.emit('newLocationMessage', generateLocationMessage('admin', coords.latitude, coords.longitude));
+    socket.on('createLocationMessage', (coords) => { 
+        var user = users.getUser(socket.id);
+        if(user){
+           io.to(user.room).emit('newLocationMessage', generateLocationMessage(user.name, coords.latitude, coords.longitude));
+        }
     });
     
     socket.on('disconnect', (socket) => {
@@ -96,7 +95,6 @@ io.on('connection', (socket) =>{
             io.to(user.room).emit('updateUserList', users.getUserList(user.room));
             io.to(user.room).emit('newMessage', 
                                   generateMessage('Admin','${user.name} has left'));
-            
         }
     });    
 });
@@ -105,7 +103,3 @@ io.on('connection', (socket) =>{
 server.listen(port, () => {
     console.log('Server is up on port: ${port}');
 });
-
-
-
-

@@ -86,7 +86,6 @@ jQuery('#message-form').on('submit', function(e) {
     // this is stop sending data on the URI
     e.preventDefault();
     socket.emit('createMessage', {
-        from: 'User',
         text: msgTextBox.val()        
     }, function () {
         
